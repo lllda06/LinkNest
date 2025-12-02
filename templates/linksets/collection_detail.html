@@ -4,7 +4,9 @@
     <h1>{{ collection.title }}</h1>
     <p>{{ collection.description }}</p>
 
-    <a href="{% url 'linksets:item_create' %}?collection_pk={{ collection.pk }}" class="btn btn-primary mb-3">Add Item</a>
+    <a href="{% url 'linksets:item_create' collection.pk %}" class="btn btn-primary mb-3">
+    Add item
+</a>
 
     <h3>Items in this Collection</h3>
     {% if collection.items.all %}

@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Collection, Item
+from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 
-# PAGE WITH COLLECTIONS
+from .models import Collection, Item
+
+
 class DashboardView(LoginRequiredMixin, ListView):
     model = Collection
     template_name = 'linksets/dashboard.html'
@@ -13,8 +14,8 @@ class DashboardView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Collection.objects.filter(owner=self.request.user)
 
-# PAGE WITH COLLECTION DETAILS
-class CollectionDetailView(DetailView):
+
+class CollectionDetailView(LoginRequiredMixin, DetailView):
     model = Collection
     template_name = 'linksets/collection_detail.html'
     context_object_name = 'collection'
@@ -22,7 +23,7 @@ class CollectionDetailView(DetailView):
     def get_queryset(self):
         return Collection.objects.filter(owner=self.request.user)
 
-# PAGE FOR CREATION NEW COLLECTION
+
 class CollectionCreateView(LoginRequiredMixin, CreateView):
     model = Collection
     template_name = 'linksets/collection_form.html'
@@ -33,14 +34,29 @@ class CollectionCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-# PAGE FOR CREATION NEW ELEMENT
+
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
     template_name = 'linksets/item_form.html'
     fields = ['title', 'url', 'note', 'tags', 'image']
 
+    def dispatch(self, request, *args, **kwargs):
+        # один раз на запрос достаём коллекцию или 404
+        self.collection = get_object_or_404(
+            Collection,
+            pk=kwargs['collection_pk'],
+            owner=request.user,  # дополнительно защищаем от чужих коллекций
+        )
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
-        form.instance.collection = Collection.objects.get(pk=self.kwargs['collection_pk'])
+        form.instance.collection = self.collection
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['collection'] = self.collection
+        return ctx
+
     def get_success_url(self):
-        return reverse_lazy('linksets:collection_detail', kwargs={'pk':self.kwargs['collection_pk']})
+        return reverse_lazy('linksets:collection_detail', kwargs={'pk': self.collection.pk})
