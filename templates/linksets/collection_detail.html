@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ collection.title }}</h1>
+    <p>{{ collection.description }}</p>
+
+    <a href="{% url 'linksets:item_create' %}?collection_pk={{ collection.pk }}" class="btn btn-primary mb-3">Add Item</a>
+
+    <h3>Items in this Collection</h3>
+    {% if collection.items.all %}
+        <ul class="list-group">
+            {% for item in collection.items.all %}
+                <li class="list-group-item">
+                    <a href="{{ item.url }}" target="_blank">{{ item.title }}</a>
+                    <p>{{ item.note }}</p>
+                    <p>
+                        {% for tag in item.tags.all %}
+                            <span class="badge bg-secondary">{{ tag.name }}</span>
+                        {% endfor %}
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No items in this collection yet.</p>
+    {% endif %}
+{% endblock %}

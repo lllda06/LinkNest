@@ -18,6 +18,7 @@ DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 
+LOGIN_URL = '/accounts/login/'
 
 # Application definition
 
@@ -68,7 +69,7 @@ WSGI_APPLICATION = 'LinkNest.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('POSTGRES_DB', default='linknest_dev').strip(),
+        'NAME': env.str('POSTGRES_DB', default='`linknest_dev`').strip(),
         'USER': env.str('POSTGRES_USER', default='admin').strip(),
         'PASSWORD': env.str('POSTGRES_PASSWORD', default='lllda06').strip(),
         'HOST': env.str('POSTGRES_HOST', default='127.0.0.1').strip(),
